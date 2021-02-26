@@ -1,0 +1,43 @@
+# define log level of Dirt
+log-level: 6
+
+# Bootstrap node. If true, the node will only participate in discovery membership, but won't 
+bootstrap: false
+
+# define metrics server settings
+metrics:
+  bind: 127.0.0.1
+  port: 9199
+
+name: node1
+
+# Cluster membership management
+discovery:
+  bind: 0.0.0.0
+  port: 7946
+  adv-address: 0.0.0.0
+  adv-port: 7946
+
+# IRTT Server Bind port
+server:
+  bind: 0.0.0.0
+  port: 2112
+
+# Join a bootstrap peer to discovery peers
+join: 10.0.0.1
+
+
+# Functionnal group of this node 
+group: backend
+
+# Peers define a list of groups from which this node will accept to peer with and participate in the IRTT.
+# Usually a node would want to peer with groups where it's sending or receiving traffic.
+# This allows to avoid peering with node of the same role that don't represent a real traffic pattern.
+# For example, two proxies are receiving traffic and connecting to backends, but they probably don't talk together
+# this is why a node could decide to not accept peering with it's own group.
+peers:
+  - frontend
+  - database
+
+# Could be used for rack awareness. Not implemented yet. Still useful for metrics aggregations (group by rack)
+rack: 000000
