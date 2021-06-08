@@ -20,6 +20,7 @@ var (
 		Name:      "members",
 		Help:      "Number of members in the memberlist cluster",
 	}, []string{"group"})
+
 )
 
 type EventType int
@@ -163,7 +164,9 @@ func (c *cluster) LocalState(join bool) []byte { return []byte{} }
 
 func (c *cluster) MergeRemoteState(buf []byte, join bool) {}
 
-func Run(quit chan struct{}, cfg *mod.Config, ch chan Event) {
+func Run(r *prometheus.Registry, quit chan struct{}, cfg *mod.Config, ch chan Event) {
+	
+	r.MustRegister(numMembers)
 
 	m := &Meta{}
 	m.Group = cfg.Group
@@ -212,10 +215,6 @@ func Run(quit chan struct{}, cfg *mod.Config, ch chan Event) {
 	}
 
 	<-quit
-}
-
-func init() {
-	prometheus.MustRegister(numMembers)
 }
 
 func DecodeMeta(b []byte) (Meta, error) {

@@ -12,6 +12,7 @@ import (
 	"github.com/StevenLeRoux/dirt/pkg/dirt"
 	mod "github.com/StevenLeRoux/dirt/pkg/mod"
 	"github.com/gofrs/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	log "github.com/sirupsen/logrus"
@@ -23,6 +24,7 @@ var (
 	projectName = "dirt"
 	seed        = "636afbf8-df68-41b2-adc2-7a8ecf06172c"
 	conf        *mod.Config
+	registry    *prometheus.Registry
 )
 
 func init() {
@@ -41,6 +43,8 @@ func init() {
 	if err := viper.BindPFlags(RootCmd.Flags()); err != nil {
 		log.Fatal(err)
 	}
+
+	registry = prometheus.NewRegistry()
 
 }
 
@@ -129,13 +133,13 @@ var RootCmd = &cobra.Command{
 		go func() {
 			listen := fmt.Sprintf("%s:%d", conf.Metrics.Bind, conf.Metrics.Port)
 			log.Infof("Start metrics endpint on on %s", listen)
-			http.Handle("/metrics", promhttp.Handler())
+			http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 			if err := http.ListenAndServe(listen, nil); err != nil && err != http.ErrServerClosed {
 				log.Fatal(err)
 			}
 		}()
 
-		d, err := dirt.Create(conf)
+		d, err := dirt.Create(registry, conf)
 		if err != nil {
 			log.Panicf("Dirt: fatal error while trying to start : %v \n", err)
 		}

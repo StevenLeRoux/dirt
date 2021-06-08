@@ -3,13 +3,16 @@ package dirt
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/StevenLeRoux/dirt/pkg/cluster"
 	mod "github.com/StevenLeRoux/dirt/pkg/mod"
 	"github.com/StevenLeRoux/dirt/pkg/utils"
+	"github.com/StevenLeRoux/promflush"
 	"github.com/hashicorp/memberlist"
 	"github.com/heistp/irtt"
 )
@@ -21,8 +24,10 @@ type Node struct {
 	Quit     chan struct{}
 }
 
-func Create(c *mod.Config) (*Node, error) {
-	fmt.Println("new node")
+func Create(r *prometheus.Registry, c *mod.Config) (*Node, error) {
+	
+	registry = r
+	registerMetrics()
 
 	ch := make(chan cluster.Event)
 
@@ -83,7 +88,7 @@ func (n *Node) Run() {
 		}()
 	}
 
-	cluster.Run(n.Quit, n.Config, n.Events)
+	cluster.Run(registry, n.Quit, n.Config, n.Events)
 
 }
 
@@ -93,7 +98,6 @@ func (n *Node) Close() {
 
 func (n *Node) runClient(server *memberlist.Node, quit chan struct{}) {
 	ctx, _ := context.WithCancel(context.Background())
-	sn := server.Name
 
 	m, err := cluster.DecodeMeta(server.Meta)
 	if err != nil {
@@ -108,9 +112,8 @@ func (n *Node) runClient(server *memberlist.Node, quit chan struct{}) {
 		select {
 		case <-quit:
 			return
-			break
 		default:
-			log.Debug("Dirt: irtt session start with: " + server.Name)
+			log.Debug("Dirt: irtt session start with: " + n.Config.Name + " -> " + server.Name)
 			clientConfig := irtt.NewClientConfig()
 			clientConfig.Duration = 5 * time.Second
 			clientConfig.LocalAddress = fmt.Sprintf("%s:0", laddr.String())
@@ -122,56 +125,71 @@ func (n *Node) runClient(server *memberlist.Node, quit chan struct{}) {
 			// Get results
 			r, err := c.Run(ctx)
 			if err != nil {
-				log.Fatal(err)
+				log.Info(err)
+				clientError.WithLabelValues(n.Config.Name, server.Name).Inc()
+			} else {
+				log.Debug("Dirt: irtt session finished" + n.Config.Name + " -> " + server.Name)
+				ts := time.Now().UnixNano()
+				n.handleStats(ts, server.Name, m, r)
 			}
-			log.Debug("Dirt: irtt session end with: " + server.Name)
-			n.handleStats(sn, m, r)
 		}
 	}
-
+	// clientRunCount
 }
 
-func (n *Node) handleStats(serverName string, m cluster.Meta, r *irtt.Result) {
+func (n *Node) handleStats(t int64, serverName string, m cluster.Meta, r *irtt.Result) {
 
 	//ss := r.SendCallStats
 	//tes := r.TimerErrorStats
 	//sps := r.ServerProcessingTimeStats
 
+	clientRunCount.WithLabelValues(n.Config.Name, serverName).Inc()
+	clientRunPkts.WithLabelValues(n.Config.Name, serverName).Add(float64(r.RTTStats.N))
+
 	rttMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Min))
-	rttMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RTTStats.Mean()))
-	rttMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(utils.Ok(r.RTTStats.Median())))
-	rttMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RTTStats.Max))
-	rttStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RTTStats.Stddev()))
 
-	senddelayMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendDelayStats.Min))
-	senddelayMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendDelayStats.Mean()))
-	senddelayMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(utils.Ok(r.SendDelayStats.Median())))
-	senddelayMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendDelayStats.Max))
-	senddelayStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendDelayStats.Stddev()))
+	rttMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Mean()))
+	rttMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.RTTStats.Median())))
+	rttMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Max))
+	rttStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Stddev()))
 
-	receivedelayMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveDelayStats.Min))
-	receivedelayMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveDelayStats.Mean()))
-	receivedelayMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(utils.Ok(r.ReceiveDelayStats.Median())))
-	receivedelayMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveDelayStats.Max))
-	receivedelayStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveDelayStats.Stddev()))
+	senddelayMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendDelayStats.Min))
+	senddelayMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendDelayStats.Mean()))
+	senddelayMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.SendDelayStats.Median())))
+	senddelayMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendDelayStats.Max))
+	senddelayStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendDelayStats.Stddev()))
 
-	ipdvMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RoundTripIPDVStats.Min))
-	ipdvMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RoundTripIPDVStats.Mean()))
-	ipdvMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(utils.Ok(r.RoundTripIPDVStats.Median())))
-	ipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RoundTripIPDVStats.Max))
-	ipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.RoundTripIPDVStats.Stddev()))
+	receivedelayMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveDelayStats.Min))
+	receivedelayMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveDelayStats.Mean()))
+	receivedelayMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.ReceiveDelayStats.Median())))
+	receivedelayMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveDelayStats.Max))
+	receivedelayStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveDelayStats.Stddev()))
 
-	sendipdvMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendIPDVStats.Min))
-	sendipdvMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendIPDVStats.Mean()))
-	sendipdvMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(utils.Ok(r.SendIPDVStats.Median())))
-	sendipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendIPDVStats.Max))
-	sendipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.SendIPDVStats.Stddev()))
+	ipdvMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RoundTripIPDVStats.Min))
+	ipdvMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RoundTripIPDVStats.Mean()))
+	ipdvMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.RoundTripIPDVStats.Median())))
+	ipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RoundTripIPDVStats.Max))
+	ipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RoundTripIPDVStats.Stddev()))
 
-	receiveipdvMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveIPDVStats.Min))
-	receiveipdvMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveIPDVStats.Mean()))
-	receiveipdvMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(utils.Ok(r.ReceiveIPDVStats.Median())))
-	receiveipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveIPDVStats.Max))
-	receiveipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, m.Group).Set(float64(r.ReceiveIPDVStats.Stddev()))
+	sendipdvMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendIPDVStats.Min))
+	sendipdvMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendIPDVStats.Mean()))
+	sendipdvMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.SendIPDVStats.Median())))
+	sendipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendIPDVStats.Max))
+	sendipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.SendIPDVStats.Stddev()))
 
-	log.Debug("Dirt: irtt metrics flush for node: " + serverName)
+	receiveipdvMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveIPDVStats.Min))
+	receiveipdvMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveIPDVStats.Mean()))
+	receiveipdvMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.ReceiveIPDVStats.Median())))
+	receiveipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveIPDVStats.Max))
+	receiveipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveIPDVStats.Stddev()))
+
+	ts := strconv.Itoa(int(t / 1e3))
+	f := "/opt/beamium/sources/dirt-" + ts + ".metrics"
+
+	err := promflush.WriteToTextfile(ts, f, registry)
+	if err != nil {
+		log.Error("Unable to flush metrics to file: ", err)
+	}
+
+	log.Debug("Dirt: irtt metrics flush for node: " + n.Config.Name + " -> " + serverName)
 }

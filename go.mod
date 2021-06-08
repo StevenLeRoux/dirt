@@ -3,6 +3,7 @@ module github.com/StevenLeRoux/dirt
 go 1.15
 
 require (
+	github.com/StevenLeRoux/promflush v0.0.0-20210603215850-2914febce310
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/hashicorp/memberlist v0.2.2
 	github.com/heistp/irtt v0.9.0
