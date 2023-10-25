@@ -8,7 +8,8 @@ require (
 	github.com/hashicorp/memberlist v0.2.2
 	github.com/heistp/irtt v0.9.0
 	github.com/ogier/pflag v0.0.1 // indirect
-	github.com/prometheus/client_golang v1.9.0
+	github.com/pkg/profile v1.2.1 // indirect
+	github.com/prometheus/client_golang v1.11.1
 	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
