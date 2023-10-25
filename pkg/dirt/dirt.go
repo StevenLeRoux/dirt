@@ -147,7 +147,6 @@ func (n *Node) handleStats(t int64, serverName string, m cluster.Meta, r *irtt.R
 	clientRunPkts.WithLabelValues(n.Config.Name, serverName).Add(float64(r.RTTStats.N))
 
 	rttMin.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Min))
-
 	rttMean.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Mean()))
 	rttMedian.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(utils.Ok(r.RTTStats.Median())))
 	rttMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.RTTStats.Max))
