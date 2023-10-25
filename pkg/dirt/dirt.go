@@ -117,7 +117,7 @@ func (n *Node) runClient(server *memberlist.Node, quit chan struct{}) {
 			clientConfig := irtt.NewClientConfig()
 			clientConfig.Duration = 5 * time.Second
 			clientConfig.LocalAddress = fmt.Sprintf("%s:0", laddr.String())
-			clientConfig.RemoteAddress = server.Addr.String() + ":2112"
+			clientConfig.RemoteAddress = fmt.Sprintf("%s:%d", server.Addr.String(), m.Port)
 
 			// Run IRTT session
 			c := irtt.NewClient(clientConfig)

@@ -20,7 +20,6 @@ var (
 		Name:      "members",
 		Help:      "Number of members in the memberlist cluster",
 	}, []string{"group"})
-
 )
 
 type EventType int
@@ -39,13 +38,14 @@ type Meta struct {
 	Name  string
 	Group string
 	Rack  string
+	Port  uint16
 }
 
 type cluster struct {
 	meta          *Meta
 	allowedGroups []string
 	members       map[string]*memberlist.Node
-	dirtChan      chan Event
+	events        chan Event
 }
 
 func (c *cluster) addMember(n *memberlist.Node) {
@@ -54,7 +54,7 @@ func (c *cluster) addMember(n *memberlist.Node) {
 	ev := Event{}
 	ev.Event = Join
 	ev.Node = n
-	c.dirtChan <- ev
+	c.events <- ev
 }
 
 func (c *cluster) delMember(n *memberlist.Node) {
@@ -63,7 +63,7 @@ func (c *cluster) delMember(n *memberlist.Node) {
 	ev := Event{}
 	ev.Event = Leave
 	ev.Node = n
-	c.dirtChan <- ev
+	c.events <- ev
 }
 
 func (c *cluster) isAllowed(s string) bool {
@@ -75,7 +75,7 @@ func (c *cluster) isAllowed(s string) bool {
 	return false
 }
 
-// Cluster struct implements the Delegate interface
+// Cluster struct implements the Memberlist Delegate interface
 func (c *cluster) NodeMeta(limit int) []byte {
 	log.Debug("Dirt: Cluster: NodeMeta: ")
 	var buf bytes.Buffer
@@ -165,22 +165,23 @@ func (c *cluster) LocalState(join bool) []byte { return []byte{} }
 func (c *cluster) MergeRemoteState(buf []byte, join bool) {}
 
 func Run(r *prometheus.Registry, quit chan struct{}, cfg *mod.Config, ch chan Event) {
-	
+
 	r.MustRegister(numMembers)
 
 	m := &Meta{}
 	m.Group = cfg.Group
 	m.Rack = cfg.Rack
 	m.Name = cfg.Name
+	m.Port = cfg.Server.Port
 
 	c := &cluster{}
 	c.meta = m
 
 	c.allowedGroups = cfg.Peers
 	c.members = make(map[string]*memberlist.Node)
-	c.dirtChan = ch
+	c.events = ch
 
-	config := memberlist.DefaultLocalConfig()
+	config := memberlist.DefaultLANConfig()
 	config.Name = cfg.Name
 	config.AdvertiseAddr = cfg.Discovery.AdvAddress
 	config.AdvertisePort = cfg.Discovery.AdvPort

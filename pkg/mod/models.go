@@ -21,7 +21,7 @@ type (
 
 	ServerConfig struct {
 		Bind string `mapstructure:"bind,omitempty"`
-		Port int    `mapstructure:"port,omitempty"`
+		Port uint16    `mapstructure:"port,omitempty"`
 	}
 
 	DiscoveryConfig struct {
