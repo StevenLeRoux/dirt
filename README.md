@@ -1,4 +1,5 @@
-#  DIRT  - Latency and Networking monitoring tool
+
+<h1><img src="https://github.com/StevenLeRoux/dirt/blob/main/icon.png?raw=true" width="64" height="64">&nbsp; DIRT  - Latency and Networking monitoring tool</h1>
 
 D.I.R.T. stands for Distributed Isochronous Roundtrip Testing. It's a monitoring tool you can deploy to continuously gather latency metrics.
 
