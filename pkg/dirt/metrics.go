@@ -235,6 +235,27 @@ var (
 		Name:      "run_packets",
 		Help:      "Number of IRTT packets per session",
 	}, []string{"nodeSrc", "nodeDst"})
+
+	receivedPkts = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "dirt",
+		Subsystem: "client",
+		Name:      "received_packets",
+		Help:      "Number of IRTT packets received",
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+
+	sentPkts = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "dirt",
+		Subsystem: "client",
+		Name:      "sent_packets",
+		Help:      "Number of IRTT packets sent",
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+
+	packetLossPercent = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: "dirt",
+		Subsystem: "client",
+		Name:      "packet_loss_percent",
+		Help:      "Percentage of IRTT packets lost",
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
 )
 
 func registerMetrics() {
@@ -272,5 +293,7 @@ func registerMetrics() {
 	registry.MustRegister(clientError)
 	registry.MustRegister(clientRunCount)
 	registry.MustRegister(clientRunPkts)
-	//registry.MustRegister()
+	registry.MustRegister(receivedPkts)
+	registry.MustRegister(sentPkts)
+	registry.MustRegister(packetLossPercent)
 }

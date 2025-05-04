@@ -182,6 +182,10 @@ func (n *Node) handleStats(t int64, serverName string, m cluster.Meta, r *irtt.R
 	receiveipdvMax.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveIPDVStats.Max))
 	receiveipdvStdDev.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(float64(r.ReceiveIPDVStats.Stddev()))
 
+	sentPkts.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Add(float64(r.PacketsSent))
+	receivedPkts.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Add(float64(r.PacketsReceived))
+	packetLossPercent.WithLabelValues(n.Config.Name, serverName, n.Config.Rack, m.Rack, n.Config.Group, m.Group).Set(r.PacketLossPercent)
+
 	ts := strconv.Itoa(int(t / 1e3))
 	f := "/opt/beamium/sources/dirt-" + ts + ".metrics"
 
