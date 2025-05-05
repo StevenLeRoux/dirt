@@ -35,10 +35,11 @@ type Event struct {
 }
 
 type Meta struct {
-	Name  string
-	Group string
-	Rack  string
-	Port  uint16
+	Name      string
+	Group     string
+	Rack      string
+	PortStart uint16
+	PortEnd   uint16
 }
 
 type cluster struct {
@@ -172,7 +173,8 @@ func Run(r *prometheus.Registry, quit chan struct{}, cfg *mod.Config, ch chan Ev
 	m.Group = cfg.Group
 	m.Rack = cfg.Rack
 	m.Name = cfg.Name
-	m.Port = cfg.Server.Port
+	m.PortStart = cfg.Server.Ports.Start
+	m.PortEnd = cfg.Server.Ports.End
 
 	c := &cluster{}
 	c.meta = m

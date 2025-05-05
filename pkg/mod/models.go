@@ -20,8 +20,8 @@ type (
 	}
 
 	ServerConfig struct {
-		Bind string `mapstructure:"bind,omitempty"`
-		Port uint16    `mapstructure:"port,omitempty"`
+		Bind  string       `mapstructure:"bind,omitempty"`
+		Ports *PortsConfig `mapstructure:"ports,omitempty"`
 	}
 
 	DiscoveryConfig struct {
@@ -29,6 +29,11 @@ type (
 		Port       int    `mapstructure:"port,omitempty"`
 		AdvAddress string `mapstructure:"adv-address,omitempty"`
 		AdvPort    int    `mapstructure:"adv-port,omitempty"`
+	}
+
+	PortsConfig struct {
+		Start uint16 `mapstructure:"start,omitempty"`
+		End   uint16 `mapstructure:"end,omitempty"`
 	}
 
 	NodeMeta struct {

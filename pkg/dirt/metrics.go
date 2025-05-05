@@ -10,252 +10,252 @@ var (
 		Subsystem: "rtt",
 		Name:      "min",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	rttMean = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "rtt",
 		Name:      "mean",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	rttMedian = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "rtt",
 		Name:      "median",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	rttMax = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "rtt",
 		Name:      "max",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	rttStdDev = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "rtt",
 		Name:      "stddev",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	senddelayMin = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_delay",
 		Name:      "min",
 		Help:      "Delay to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	senddelayMean = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_delay",
 		Name:      "mean",
 		Help:      "Delay to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	senddelayMedian = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_delay",
 		Name:      "median",
 		Help:      "Delay to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	senddelayMax = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_delay",
 		Name:      "max",
 		Help:      "Delay to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	senddelayStdDev = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_delay",
 		Name:      "stddev",
 		Help:      "Delay to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receivedelayMin = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_delay",
 		Name:      "min",
 		Help:      "Delay to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receivedelayMean = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_delay",
 		Name:      "mean",
 		Help:      "Delay to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receivedelayMedian = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_delay",
 		Name:      "median",
 		Help:      "Delay to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receivedelayMax = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_delay",
 		Name:      "max",
 		Help:      "Delay to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receivedelayStdDev = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_delay",
 		Name:      "stddev",
 		Help:      "Delay to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	ipdvMin = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "ipdv",
 		Name:      "min",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	ipdvMean = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "ipdv",
 		Name:      "mean",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	ipdvMedian = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "ipdv",
 		Name:      "median",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	ipdvMax = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "ipdv",
 		Name:      "max",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	ipdvStdDev = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "ipdv",
 		Name:      "stddev",
 		Help:      "Round Trip time latency",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	sendipdvMin = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_ipdv",
 		Name:      "min",
 		Help:      "ipdv to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	sendipdvMean = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_ipdv",
 		Name:      "mean",
 		Help:      "ipdv to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	sendipdvMedian = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_ipdv",
 		Name:      "median",
 		Help:      "ipdv to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	sendipdvMax = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_ipdv",
 		Name:      "max",
 		Help:      "ipdv to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	sendipdvStdDev = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "send_ipdv",
 		Name:      "stddev",
 		Help:      "ipdv to send the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receiveipdvMin = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_ipdv",
 		Name:      "min",
 		Help:      "ipdv to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receiveipdvMean = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_ipdv",
 		Name:      "mean",
 		Help:      "ipdv to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receiveipdvMedian = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_ipdv",
 		Name:      "median",
 		Help:      "ipdv to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receiveipdvMax = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_ipdv",
 		Name:      "max",
 		Help:      "ipdv to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	receiveipdvStdDev = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "receive_ipdv",
 		Name:      "stddev",
 		Help:      "ipdv to receive the payload",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	clientError = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "dirt",
 		Subsystem: "client",
 		Name:      "error",
 		Help:      "Errors encountered by clients",
-	}, []string{"nodeSrc", "nodeDst"})
+	}, []string{"nodeSrc", "nodeDst", "port"})
 
 	clientRunCount = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "dirt",
 		Subsystem: "client",
 		Name:      "run_count",
 		Help:      "Number of IRTT sessions run between a client and a server",
-	}, []string{"nodeSrc", "nodeDst"})
+	}, []string{"nodeSrc", "nodeDst", "port"})
 
 	clientRunPkts = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "dirt",
 		Subsystem: "client",
 		Name:      "run_packets",
 		Help:      "Number of IRTT packets per session",
-	}, []string{"nodeSrc", "nodeDst"})
+	}, []string{"nodeSrc", "nodeDst", "port"})
 
 	receivedPkts = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "dirt",
 		Subsystem: "client",
 		Name:      "received_packets",
 		Help:      "Number of IRTT packets received",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	sentPkts = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "dirt",
 		Subsystem: "client",
 		Name:      "sent_packets",
 		Help:      "Number of IRTT packets sent",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 
 	packetLossPercent = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "dirt",
 		Subsystem: "client",
 		Name:      "packet_loss_percent",
 		Help:      "Percentage of IRTT packets lost",
-	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst"})
+	}, []string{"nodeSrc", "nodeDst", "rackSrc", "rackDst", "groupSrc", "groupDst", "port"})
 )
 
 func registerMetrics() {
