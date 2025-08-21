@@ -25,7 +25,7 @@ type Node struct {
 }
 
 func Create(r *prometheus.Registry, c *mod.Config) (*Node, error) {
-	
+
 	registry = r
 	registerMetrics()
 
@@ -97,7 +97,8 @@ func (n *Node) Close() {
 }
 
 func (n *Node) runClient(server *memberlist.Node, quit chan struct{}) {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	m, err := cluster.DecodeMeta(server.Meta)
 	if err != nil {

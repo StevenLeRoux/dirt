@@ -110,7 +110,7 @@ func initConfig() {
 
 	if viper.GetBool("debug") {
 		log.SetLevel(log.DebugLevel)
-		log.Info("Dirt: log level set to  " + string(log.GetLevel()))
+		log.Info("Dirt: log level set to  " + log.GetLevel().String())
 	}
 
 	if ok := viper.IsSet("join"); !ok {

@@ -16,12 +16,14 @@ discovery:
   bind: 0.0.0.0
   port: 7946
   adv-address: 0.0.0.0
-  adv-port: 7946
+  adv-port: 1234
 
 # IRTT Server Bind port
 server:
   bind: 0.0.0.0
   port: 2112
+  adv-address: 0.0.0.0
+  adv-port: 1235
 
 # Join a bootstrap peer to discovery peers
 join: 10.0.0.1
@@ -38,6 +40,3 @@ group: backend
 peers:
   - frontend
   - database
-
-# Could be used for rack awareness. Not implemented yet. Still useful for metrics aggregations (group by rack)
-rack: 000000

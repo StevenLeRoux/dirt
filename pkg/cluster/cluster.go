@@ -172,7 +172,7 @@ func Run(r *prometheus.Registry, quit chan struct{}, cfg *mod.Config, ch chan Ev
 	m.Group = cfg.Group
 	m.Rack = cfg.Rack
 	m.Name = cfg.Name
-	m.Port = cfg.Server.Port
+	m.Port = cfg.Server.AdvPort
 
 	c := &cluster{}
 	c.meta = m
@@ -184,9 +184,9 @@ func Run(r *prometheus.Registry, quit chan struct{}, cfg *mod.Config, ch chan Ev
 	config := memberlist.DefaultLANConfig()
 	config.Name = cfg.Name
 	config.AdvertiseAddr = cfg.Discovery.AdvAddress
-	config.AdvertisePort = cfg.Discovery.AdvPort
+	config.AdvertisePort = int(cfg.Discovery.AdvPort)
 	config.BindAddr = cfg.Discovery.Bind
-	config.BindPort = cfg.Discovery.Port
+	config.BindPort = int(cfg.Discovery.Port)
 	config.Delegate = c
 
 	if !cfg.Bootstrap {

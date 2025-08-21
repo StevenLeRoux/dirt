@@ -1,32 +1,93 @@
+<h1><img src="https://github.com/StevenLeRoux/dirt/blob/main/icon.png?raw=true" width="64" height="64">&nbsp; DIRT - Distributed Isochronous Roundtrip Tester</h1>
 
-<h1><img src="https://github.com/StevenLeRoux/dirt/blob/main/icon.png?raw=true" width="64" height="64">&nbsp; DIRT  - Latency and Networking monitoring tool</h1>
+**Monitor network latency and jitter with precision across your distributed systems.**
 
-D.I.R.T. stands for Distributed Isochronous Roundtrip Testing. It's a monitoring tool you can deploy to continuously gather latency metrics.
+<!-- Add Badges Here: e.g., Go Version, License, Build Status, Release -->
+<!-- ![Go Version](https://img.shields.io/badge/go-1.18%2B-blue.svg) -->
+<!-- ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg) -->
+<!-- ![Build Status](https://github.com/StevenLeRoux/dirt/actions/workflows/go.yml/badge.svg) -->
 
-It provides observability metrics (min, max, mean, median and standard deviation) for : 
- - **Round Trip Time latency** (RTT): How much time a packet take to go to a remote host and then return 
- - **Send Delay**: Which is the latency to send packets to a remote host
- - **Receive Delay**: Which is the latency to receive packets from a remote host
- - **IP Packet Delay Variation** (IPDV): variation in delay (jitter) for consecutive packets for a complete round trip
- - **Send IPDV**: variation in delay (jitter)for consecutive packets to remote server
- - **Receive IPDV**: variation in delay (jitter) for consecutive packets from remote server
+D.I.R.T. (Distributed Isochronous Roundtrip Testing) is a powerful monitoring tool designed to continuously gather and analyze critical network latency metrics within your infrastructure.
 
-IPDV jitters are useful to monitor how different workloads can conflict themselves, for example with low latency small packets vs high bandwidth use cases.
+## Why DIRT?
 
-## How does it work?
+Understanding network performance is vital for application reliability and user experience. DIRT helps you:
 
-DIRT leverages [IRTT](https://github.com/heistp/irtt) and make it distributed. Under the hood, it uses Memberlist to create a cluster while adding filtering logic to help managing topologies.
+*   **Pinpoint Bottlenecks:** Identify exactly where latency issues occur in your network paths.
+*   **Proactive Monitoring:** Continuously track performance to detect degradations before they impact users.
+*   **Validate Network SLAs:** Ensure your network meets the required performance standards.
+*   **Understand Impact of Workloads:** Observe how different applications and traffic patterns affect network jitter and latency.
+*   **Optimize Distributed Systems:** Gain insights needed to fine-tune communication between your services.
 
-## Clustering
+## Key Features
 
-You can define topologies to decide if a node should participate or not in a monitoring session. Basically, you will assigne a node into a `Group`, then define `Peers`.
+DIRT provides detailed observability metrics, including min, max, mean, median, and standard deviation for:
 
-`Peers` are a list of groups from which this node will accept to peer with and participate in an IRTT session.
-Usually a node would want to peer with groups where it's sending or receiving traffic. This allows to avoid peering with node of the same role that don't represent a real traffic pattern. For example, two proxies are receiving traffic and connecting to backends, but they probably don't talk together this is why a node could decide to not accept peering with it's own group.
+*   **Round Trip Time (RTT):** Total time for a packet to travel to a remote host and return.
+*   **Send Delay:** Latency to send packets to a remote host.
+*   **Receive Delay:** Latency to receive packets from a remote host.
+*   **IP Packet Delay Variation (IPDV / Jitter):** Variation in delay for consecutive packets (round trip).
+*   **Send IPDV:** Jitter for outbound packets.
+*   **Receive IPDV:** Jitter for inbound packets.
 
-See this example from the sample config file:
+IPDV (jitter) metrics are particularly useful for monitoring how different network workloads might conflict, such as low-latency small packets versus high-bandwidth traffic.
 
+## How it Works
+
+DIRT extends the capabilities of [IRTT (Isochronous Round-Trip Tester)](https://github.com/heistp/irtt) by making it distributed. It utilizes [Memberlist](https://github.com/hashicorp/memberlist) for cluster discovery and management, with intelligent filtering to manage complex network topologies.
+
+<!-- Consider adding a simple architecture diagram here -->
+
+## Getting Started
+
+### Prerequisites
+
+*   Go (version 1.18 or higher recommended)
+
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/StevenLeRoux/dirt.git
+    cd dirt
+    ```
+2.  Build the binary:
+    ```bash
+    go build
+    ```
+    This will create a `dirt` executable in the current directory.
+
+### Configuration
+
+1.  Copy the sample configuration file:
+    ```bash
+    cp config.sample.yaml config.yaml
+    ```
+2.  Edit `config.yaml` to suit your environment. Key settings include:
+    *   `group`: The group this node belongs to (e.g., `frontend`, `backend`).
+    *   `peers`: A list of groups this node should attempt to connect with for monitoring.
+    *   `listen`: Network interface and port for DIRT to listen on.
+    *   `members`: List of known cluster members to join.
+
+    Refer to the comments in `config.sample.yaml` for detailed explanations of all options.
+
+### Running DIRT
+
+Once configured, you can run DIRT:
+```bash
+./dirt -config config.yaml
 ```
+
+DIRT will then start, attempt to join the cluster, and begin monitoring peers based on your configuration.
+
+## Clustering and Topology
+
+You can define topologies to control which nodes participate in monitoring sessions. Assign a node to a `group` and then define `peers` (a list of groups) with which this node will establish IRTT sessions.
+
+For example, a `backend` node might only peer with `frontend` and `database` groups, avoiding unnecessary checks with other `backend` nodes if they don't directly communicate.
+
+```yaml
+# Sample config snippet from config.yaml
 group: backend
 
 peers:
@@ -34,58 +95,49 @@ peers:
   - database
 ```
 
-This node is a `backend` node, and it's not interested in checking latencies with other backend nodes. However, it's configured to accepted and establish sessions with `frontend` nodes and `database` nodes. This way, we ensure checking latencies for a real traffic pattern.
+This ensures that latency monitoring focuses on actual traffic patterns.
 
-When applied to distributed clusters, you can choose to peer with node from your own group. Note that the metrics cardinality can be very high in case you apply it globally in an 100+ nodes cluster. Later enhancement would allow to enable or disable metrics to observe only a subset of metrics.
+### Bootstrap Node
 
+A node can be configured as a `bootstrap` node. Bootstrap nodes manage cluster membership but do not participate in latency monitoring tasks themselves.
 
-### Bootstrap node
+### Rack Awareness (Planned)
 
-You can define a node as a `bootstrap` node that will only manage clustering, but won't participate in latency monitoring.
+Future versions will introduce rack awareness. This will allow electing specific nodes within a rack to monitor connectivity to elected nodes in other racks, optimizing the number of monitoring sessions while still providing comprehensive inter-rack latency data.
 
-### Rack awareness
+## Metrics Export
 
-In a future release, there will be the ability to elect a given node from a rack, to reach out other elected nodes from other racks. This way we reduce session cardinalities to reduce flows between machines while gathering insightful data for your topology. Usually you would want to check networking latencies between all machines among a Top of Rack Switch, while you would want to establish only 1 flow from a rack to another to avoid duplicate metrics.
+DIRT exposes its own operational metrics (e.g., number of cluster nodes) and detailed latency metrics. All metrics include labels for powerful aggregation and filtering (e.g., by source/destination node, rack, or group):
 
-## Configuration
+*   `node_source`
+*   `node_destination`
+*   `rack_source`
+*   `rack_destination`
+*   `group_source`
+*   `group_destination`
 
-DIRT comes with a [sample config file](config.sample.yaml). Simply copy the sample to *config.yaml*, and replace fields according to your expectations.
-
+Currently, DIRT integrates with [Beamium](https://github.com/clevercloud/beamium) for metrics export. Support for other systems (e.g., Prometheus) may be added in the future.
 
 ## Status
 
-DIRT is considered under developpement and provided without any warranty.
-
-Currently it integrates with [Beamium](https://github.com/clevercloud/beamium) to export Metrics. 
-
-## Metrics
-
-In addition to latencies metrics, DIRT exposes its own metrics with the number of nodes in the cluster. All metrics use labels to perform later aggregations and reduction (e.g. group by source / remote server). These labels are: 
-- node Source
-- node Destination
-- rack Source
-- rack Destination
-- group Source
-- group Destination
-
-It will help to group by node, rack or group to identify traffic issues.
+DIRT is under active development. While it's a powerful tool, it should be considered beta software. We welcome feedback and contributions!
 
 ## Contributing
 
-Contributions are welcomed in any area like:
-- Code and features
-- Documentation
-- Logo
+We welcome contributions in all areas!
 
-## Building 
+*   **Code & Features:** Help us build new functionalities or improve existing ones.
+*   **Documentation:** Enhance our guides, examples, and explanations.
+*   **Bug Reports & Testing:** Identify issues and help us make DIRT more robust.
+*   **Logo & Design:** Have an idea for a new logo or visual improvements?
 
-Dirt is easy to build and only require having a GO runtime.
+Please read our `CONTRIBUTING.md` (to be created) for guidelines on how to contribute.
 
-```
-git clone https://github.com/StevenLeRoux/dirt.git && cd dirt
-go build
-```
+## License
 
-## Get in touch
+DIRT is licensed under the [Apache License 2.0](LICENSE). <!-- Create a LICENSE file -->
 
-- Twitter: [@GwinizDu](https://twitter.com/GwinizDu)
+## Get in Touch
+
+*   **Issues:** [GitHub Issues](https://github.com/StevenLeRoux/dirt/issues)
+*   **Twitter:** [@GwinizDu](https://twitter.com/GwinizDu)
